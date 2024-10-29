@@ -43,11 +43,7 @@ function LeaderboardPage() {
 		//listen for changes and update the state with new data when it comes in.
 		fetch(
 			'https://zugexm5j5h5sk5g5sfhy4r3p6e0cnler.lambda-url.us-east-1.on.aws/'
-		).then((res) => {
-			res.json().then((data) => {
-				console.log('data', data)
-			})
-		})
+		)
 	}, [])
 
 	useEffect(() => {
@@ -92,6 +88,7 @@ function LeaderboardPage() {
 			})
 
 		return () => {
+			console.log('closing all connections')
 			events.closeAll()
 		}
 	})
