@@ -7,8 +7,6 @@ import { events } from 'aws-amplify/data'
 import { Navbar } from '@/components/ui/navbar'
 import { Footer } from '@/components/ui/footer'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Amplify } from 'aws-amplify'
-const config = Amplify.getConfig()
 
 function LeaderboardPage() {
 	const [leaderboardData, setLeaderboardData] = useState<Player[]>([
