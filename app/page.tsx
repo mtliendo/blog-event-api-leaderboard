@@ -93,7 +93,7 @@ function LeaderboardPage() {
 			console.log('closing all connections')
 			events.closeAll()
 		}
-	})
+	}, [])
 
 	return (
 		<div className="flex flex-col min-h-screen bg-background">
