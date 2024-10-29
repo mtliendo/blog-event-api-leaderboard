@@ -1,37 +1,19 @@
 import { env } from '$amplify/env/leaderboard-updater'
 const ids = [{ id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }, { id: '5' }]
 export const handler = async () => {
-	// Promise that resolves when all intervals are done
 	return new Promise((resolve) => {
-		let count = 0
-		const maxIterations = 20 // For example, run 20 times
-
-		// Keep track of the interval so we can clear it
 		const interval = setInterval(() => {
-			count++
-			console.log(`Iteration ${count} at ${new Date().toISOString()}`)
-
-			// Your actual work here
+			console.log(`Iteration at ${new Date().toISOString()}`)
 			doSomething()
+		}, 3000)
 
-			// Check if we're done
-			if (count >= maxIterations) {
-				clearInterval(interval)
-				resolve({
-					statusCode: 200,
-					body: `Completed ${count} iterations`,
-				})
-			}
-		}, 3000) // Run every 3 seconds
-
-		// Safety cleanup - clear interval after 3 minutes (or whatever your timeout is)
 		setTimeout(() => {
 			clearInterval(interval)
 			resolve({
 				statusCode: 200,
-				body: `Timed out after ${count} iterations`,
+				body: 'Completed interval run',
 			})
-		}, 60000) // 1 minute in milliseconds
+		}, 15000)
 	})
 }
 
