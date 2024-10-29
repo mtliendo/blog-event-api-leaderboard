@@ -37,12 +37,16 @@ function LeaderboardPage() {
 		},
 	])
 
-	useEffect(() => {
+	const handlePublish = async () => {
 		//listen for changes and update the state with new data when it comes in.
-		fetch(
+		const res = await fetch(
 			'https://zugexm5j5h5sk5g5sfhy4r3p6e0cnler.lambda-url.us-east-1.on.aws/'
 		)
-	}, [])
+
+		const data = await res.json()
+
+		console.log('done executing', data)
+	}
 
 	useEffect(() => {
 		const channelConnect = async () => {
@@ -95,6 +99,7 @@ function LeaderboardPage() {
 		<div className="flex flex-col min-h-screen bg-background">
 			<Navbar />
 			<main className="flex-grow container mx-auto px-4 py-8">
+				<button onClick={handlePublish}>Start Publishing</button>
 				<Card className="mb-8">
 					<CardHeader>
 						<CardTitle className="text-3xl font-bold text-center text-primary">
