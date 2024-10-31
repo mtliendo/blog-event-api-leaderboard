@@ -7,7 +7,7 @@ import { events } from 'aws-amplify/data'
 import { Navbar } from '@/components/ui/navbar'
 import { Footer } from '@/components/ui/footer'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-
+import config from '@/amplify_outputs.json'
 function LeaderboardPage() {
 	const [leaderboardData, setLeaderboardData] = useState<Player[]>([
 		{
@@ -39,9 +39,7 @@ function LeaderboardPage() {
 
 	const handlePublish = async () => {
 		//listen for changes and update the state with new data when it comes in.
-		const res = await fetch(
-			'https://zugexm5j5h5sk5g5sfhy4r3p6e0cnler.lambda-url.us-east-1.on.aws/'
-		)
+		const res = await fetch(config.custom.functionUrl)
 
 		const data = await res.json()
 
