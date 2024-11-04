@@ -55,6 +55,7 @@ const LeaderboardProvider: React.FC<{ children: React.ReactNode }> = ({
 // Optimized LeaderboardPage component
 function LeaderboardPage() {
 	const { leaderboardData, setLeaderboardData } = useLeaderboard()
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const channelRef = useRef<any>(null)
 
 	const handlePublish = useCallback(async () => {
