@@ -12,14 +12,6 @@ export function Navbar() {
 						<Trophy className="h-6 w-6 text-yellow-400" />
 						<span className="font-bold text-lg ">Leaderboard</span>
 					</Link>
-					<div className="flex space-x-4">
-						<Link
-							href="/second"
-							className="flex items-center space-x-1 hover:text-green-500"
-						>
-							<span>Page2</span>
-						</Link>
-					</div>
 				</div>
 			</div>
 		</nav>

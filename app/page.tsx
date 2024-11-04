@@ -1,103 +1,123 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, {
+	useEffect,
+	useCallback,
+	useRef,
+	useMemo,
+	createContext,
+	useContext,
+	useState,
+} from 'react'
 import ViewOnlyLeaderboard, { Player } from '@/components/leaderboard'
 import { events } from 'aws-amplify/data'
-
 import { Navbar } from '@/components/ui/navbar'
 import { Footer } from '@/components/ui/footer'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import config from '@/amplify_outputs.json'
-function LeaderboardPage() {
+import { Button } from '@/components/ui/button'
+
+// Create a context for the leaderboard data
+const LeaderboardContext = createContext<{
+	leaderboardData: Player[]
+	setLeaderboardData: React.Dispatch<React.SetStateAction<Player[]>>
+} | null>(null)
+
+// Custom hook to use the leaderboard context
+const useLeaderboard = () => {
+	const context = useContext(LeaderboardContext)
+	if (!context) {
+		throw new Error('useLeaderboard must be used within a LeaderboardProvider')
+	}
+	return context
+}
+
+// LeaderboardProvider component
+const LeaderboardProvider: React.FC<{ children: React.ReactNode }> = ({
+	children,
+}) => {
 	const [leaderboardData, setLeaderboardData] = useState<Player[]>([
-		{
-			name: 'Michael',
-			score: 0,
-			id: '1',
-		},
-		{
-			name: 'Brice',
-			score: 0,
-			id: '2',
-		},
-		{
-			name: 'Bill',
-			score: 0,
-			id: '3',
-		},
-		{
-			name: 'Dan',
-			score: 0,
-			id: '4',
-		},
-		{
-			name: 'Arundeep',
-			score: 0,
-			id: '5',
-		},
+		{ name: 'Michael', score: 0, id: '1' },
+		{ name: 'Brice', score: 0, id: '2' },
+		{ name: 'Bill', score: 0, id: '3' },
+		{ name: 'Dan', score: 0, id: '4' },
+		{ name: 'Arundeep', score: 0, id: '5' },
 	])
 
-	const handlePublish = async () => {
-		//listen for changes and update the state with new data when it comes in.
-		const res = await fetch(config.custom.functionUrl)
+	return (
+		<LeaderboardContext.Provider
+			value={{ leaderboardData, setLeaderboardData }}
+		>
+			{children}
+		</LeaderboardContext.Provider>
+	)
+}
 
-		const data = await res.json()
+// Optimized LeaderboardPage component
+function LeaderboardPage() {
+	const { leaderboardData, setLeaderboardData } = useLeaderboard()
+	const channelRef = useRef<any>(null)
 
-		console.log('done executing', data)
-	}
-
-	useEffect(() => {
-		const channelConnect = async () => {
-			console.log('in here')
-			try {
-				const channel = await events.connect('/default/channel')
-				console.log('channel subscribinb')
-				return channel
-			} catch (e) {
-				console.log('uh oh, ', e)
-			}
-		}
-		channelConnect()
-			.then((channel) => {
-				if (!channel) {
-					console.log('no channel')
-					return
-				}
-				channel.subscribe({
-					next: (data) => {
-						console.log('data', data)
-						//find the player by their id
-						const foundPlayer = leaderboardData.find(
-							(player) => player.id === data.id
-						) as Player
-
-						foundPlayer.score += data.score
-						const newLeaderboardData = leaderboardData.map((player) => {
-							if (player.id === data.id) {
-								return foundPlayer
-							}
-							return player
-						})
-						setLeaderboardData(newLeaderboardData)
-					},
-					error: (err) => console.log(err),
-				})
+	const handlePublish = useCallback(async () => {
+		for (let i = 0; i < 5; i++) {
+			const randomItem =
+				leaderboardData[Math.floor(Math.random() * leaderboardData.length)].id
+			const randomScore = Math.floor(Math.random() * 20)
+			console.log('randomItem', randomItem, randomScore)
+			await events.post('/default/channel', {
+				id: randomItem,
+				score: randomScore,
 			})
-			.catch((error) => {
-				console.log('error', error)
-			})
-
-		return () => {
-			console.log('closing all connections')
-			events.closeAll()
+			await new Promise((resolve) => setTimeout(resolve, 2000))
 		}
 	}, [leaderboardData])
+
+	useEffect(() => {
+		const handleNewData = (data: { id: string; score: number }) => {
+			console.log('data', data)
+			setLeaderboardData((prevLeaderboard) => {
+				return prevLeaderboard.map((player) =>
+					player.id === data.id
+						? { ...player, score: player.score + data.score }
+						: player
+				)
+			})
+		}
+
+		const channelConnect = async () => {
+			console.log('Connecting to channel')
+			try {
+				const channel = await events.connect('/default/channel')
+				console.log('Channel subscribed')
+				channelRef.current = channel.subscribe({
+					next: handleNewData,
+					error: (err) => console.log(err),
+				})
+			} catch (e) {
+				console.log('Error connecting to channel: ', e)
+			}
+		}
+
+		channelConnect()
+
+		return () => {
+			if (channelRef.current) {
+				channelRef.current.unsubscribe()
+			}
+		}
+	}, [])
+
+	const memoizedLeaderboard = useMemo(
+		() => <ViewOnlyLeaderboard initialData={leaderboardData} />,
+		[leaderboardData]
+	)
 
 	return (
 		<div className="flex flex-col min-h-screen bg-background">
 			<Navbar />
 			<main className="flex-grow container mx-auto px-4 py-8">
-				<button onClick={handlePublish}>Start Publishing</button>
+				<Button onClick={handlePublish} className="mb-4">
+					Simulate Scoring
+				</Button>
 				<Card className="mb-8">
 					<CardHeader>
 						<CardTitle className="text-3xl font-bold text-center text-primary">
@@ -111,13 +131,18 @@ function LeaderboardPage() {
 						</p>
 					</CardContent>
 				</Card>
-				<div className="max-w-4xl mx-auto">
-					<ViewOnlyLeaderboard initialData={leaderboardData} />
-				</div>
+				<div className="max-w-4xl mx-auto">{memoizedLeaderboard}</div>
 			</main>
 			<Footer />
 		</div>
 	)
 }
 
-export default LeaderboardPage
+// Wrap the LeaderboardPage with the LeaderboardProvider
+const WrappedLeaderboardPage = () => (
+	<LeaderboardProvider>
+		<LeaderboardPage />
+	</LeaderboardProvider>
+)
+
+export default WrappedLeaderboardPage
