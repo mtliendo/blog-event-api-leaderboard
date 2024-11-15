@@ -8,34 +8,35 @@ import { Footer } from '@/components/ui/footer'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
+const players = [
+	{ name: 'Michael', score: 0, id: 'abc123' },
+	{ name: 'Brice', score: 0, id: 'def456' },
+	{ name: 'Bill', score: 0, id: 'hij789' },
+	{ name: 'Dan', score: 0, id: 'adh147' },
+	{ name: 'Arundeep', score: 0, id: 'bei258' },
+]
+
 function LeaderboardPage() {
-	const [leaderboardData, setLeaderboardData] = useState([
-		{ name: 'Michael', score: 0, id: '1' },
-		{ name: 'Brice', score: 0, id: '2' },
-		{ name: 'Bill', score: 0, id: '3' },
-		{ name: 'Dan', score: 0, id: '4' },
-		{ name: 'Arundeep', score: 0, id: '5' },
-	])
+	const [leaderboardData, setLeaderboardData] = useState(players)
 
 	const channelRef = useRef<EventsChannel | null>(null)
 
 	const handlePublish = async () => {
-		for (let i = 0; i < 5; i++) {
+		for (let i = 0; i <= 10; i++) {
 			const randomItem =
 				leaderboardData[Math.floor(Math.random() * leaderboardData.length)].id
 			const randomScore = Math.floor(Math.random() * 20)
-			console.log('randomItem', randomItem, randomScore)
+
 			await events.post('/default/channel', {
 				id: randomItem,
 				score: randomScore,
 			})
-			await new Promise((resolve) => setTimeout(resolve, 2000))
+			await new Promise((resolve) => setTimeout(resolve, 100))
 		}
 	}
 
 	useEffect(() => {
 		const handleNewData = (data: { id: string; score: number }) => {
-			console.log('data', data)
 			setLeaderboardData((prevLeaderboard) => {
 				return prevLeaderboard.map((player) =>
 					player.id === data.id
@@ -46,10 +47,8 @@ function LeaderboardPage() {
 		}
 
 		const channelConnect = async () => {
-			console.log('Connecting to channel')
 			try {
 				const channel = await events.connect('/default/channel')
-				console.log('Channel subscribed')
 				channelRef.current = channel
 
 				channel.subscribe({
