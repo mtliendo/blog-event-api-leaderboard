@@ -84,7 +84,7 @@ function LeaderboardPage() {
 					</CardHeader>
 					<CardContent>
 						<p className="text-center text-muted-foreground">
-							Track your progress and compete with others. May the best player
+							View your progress and compete with others. May the best player
 							win!
 						</p>
 					</CardContent>
