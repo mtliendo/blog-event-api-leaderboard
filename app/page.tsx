@@ -12,8 +12,8 @@ const players = [
 	{ name: 'Michael', score: 0, id: 'abc123' },
 	{ name: 'Brice', score: 0, id: 'def456' },
 	{ name: 'Bill', score: 0, id: 'hij789' },
-	{ name: 'Dan', score: 0, id: 'adh147' },
-	{ name: 'Arundeep', score: 0, id: 'bei258' },
+	{ name: 'Dan', score: 0, id: 'kln123' },
+	{ name: 'Arundeep', score: 0, id: 'opq456' },
 ]
 
 function LeaderboardPage() {
@@ -27,7 +27,7 @@ function LeaderboardPage() {
 				leaderboardData[Math.floor(Math.random() * leaderboardData.length)].id
 			const randomScore = Math.floor(Math.random() * 20)
 
-			await events.post('/default/channel', {
+			await events.post('/default/leaderboard', {
 				id: randomItem,
 				score: randomScore,
 			})
@@ -36,19 +36,9 @@ function LeaderboardPage() {
 	}
 
 	useEffect(() => {
-		const handleNewData = (data: { id: string; score: number }) => {
-			setLeaderboardData((prevLeaderboard) => {
-				return prevLeaderboard.map((player) =>
-					player.id === data.id
-						? { ...player, score: player.score + data.score }
-						: player
-				)
-			})
-		}
-
 		const channelConnect = async () => {
 			try {
-				const channel = await events.connect('/default/channel')
+				const channel = await events.connect('/default/leaderboard')
 				channelRef.current = channel
 
 				channel.subscribe({
@@ -58,6 +48,16 @@ function LeaderboardPage() {
 			} catch (e) {
 				console.log('Error connecting to channel: ', e)
 			}
+		}
+
+		const handleNewData = (data: { id: string; score: number }) => {
+			setLeaderboardData((prevLeaderboard) => {
+				return prevLeaderboard.map((player) =>
+					player.id === data.id
+						? { ...player, score: player.score + data.score }
+						: player
+				)
+			})
 		}
 
 		channelConnect()

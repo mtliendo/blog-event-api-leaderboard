@@ -6,12 +6,9 @@ import {
 } from 'aws-cdk-lib/aws-appsync'
 import { defineBackend } from '@aws-amplify/backend'
 
-/**
- * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more
- */
 const backend = defineBackend({})
 
-const customResources = backend.createStack('custom-resources-snapscribe')
+const customResources = backend.createStack('custom-resources-leaderboard')
 
 const cfnEventAPI = new CfnApi(customResources, 'cfnEventAPI', {
 	name: 'realtime-leaderboard',
